@@ -6,50 +6,62 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Programinha de fala </title>
-</head>
-    <body>
-        Selecionar Voz: <select id='voiceList'></select><br><br>
-            <input id="txtInput" /><br><br>
-            <button id="btnSpeak">Falar!</button>
-            
-            <script>
-                var txtInput  = document.querySelector('#txtInput')
-                var voiceList = document.querySelector('#voiceList')
-                var btnSpeak  = document.querySelector('#btnSpeak')
-                var synth     = window.speechSynthesis;
-                var voices    = []
-            
-                NewVoices ()
-                if(speechSynthesis !== undefined) {
-                    speechSynthesis.onvoiceschanged = NewVoices
-                }
+    <style type="text/css">
 
-                btnSpeak.addEventListener('click', () => {
-                    var toSpeak = new SpeechSynthesisUtterance(txtInput.value) 
-                    var selectedVoiceName = voiceList.selectedOptions[0].getAttribute('data-name');
-                    voices.forEach((voice) => {
-                        if(voice.name === selectedVoiceName) {
-                            toSpeak.voice = voice
-                        }
-                    })
-                    
-                    synth.speak(toSpeak);
+        body {
+            background-color: #cecece;
+        }
+        input {
+            width: 300px;
+        }
+    </style>
+</head>
+
+    <body>
+        <!-- <audio id="sound" src="campainha.mp3" style="display: none;"></audio> -->
+        <script>
+            var voiceList = "Microsoft Daniel - Portuguese (Brazil)"
+            var synth     = window.speechSynthesis;
+            var voices    = []
+        
+            NewVoices ()
+            if(speechSynthesis !== undefined) {
+                speechSynthesis.onvoiceschanged = NewVoices
+            }
+
+            function NewVoices () {
+                voices = synth.getVoices()
+                var selectedIndex = voiceList.selectedIndex 
+                voiceList.inneHTML = ''
+                voices.forEach((voice) => {
+                    var listItem = document.createElement('option')
+                    listItem.textContent = voice.name
+                    listItem.setAttribute('data-lang', "pt-BR")
+                    listItem.setAttribute('data-name', voice.name)
+                    voiceList.appendChild(listItem)
                 })
+            
+                voiceList.selectedIndex = selectedIndex
+            }
+            
+            addEventListener('click', () => {
+                let context = new AudioContext(),
+                oscillator = context.createOscillator(),
+                contextGain = context.createGain();
+
+                oscillator.connect(contextGain);
+                contextGain.connect(context.destination);
+                oscillator.start(0);
+                contextGain.gain.exponentialRampToValueAtTime(
+                    0.00195, context.currentTime + 1        
+                )
+
+                var toSpeak = new SpeechSynthesisUtterance('Próximo, Senha, SIN001 Guichê 8') 
+                setTimeout(() => {synth.speak(toSpeak);}, 1000);
                 
-                function NewVoices () {
-                    voices = synth.getVoices()
-                    var selectedIndex = voiceList.selectedIndex < 0 ? 0 : voiceList.selectedIndex 
-                    voiceList.inneHTML = ''
-                    voices.forEach((voice) => {
-                        var listItem = document.createElement('option')
-                        listItem.textContent = voice.name
-                        listItem.setAttribute('data-lang', voice.lang)
-                        listItem.setAttribute('data-name', voice.name)
-                        voiceList.appendChild(listItem)
-                    })
                 
-                    voiceList.selectedIndex = selectedIndex
-                }
+            })
         </script>
     </body>    
+
 </html>
